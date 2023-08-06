@@ -1,0 +1,203 @@
+{% extends 'Modele_admin/base_modele.html' %}
+{% block page_title %}
+<h1 style="color:dark">Ressource Usage</h1>
+{% endblock page_title %}
+{% block main_content %}
+ <!-- Dans le fichier "PerformancesDetails.html" -->
+
+    <section class="content">
+    
+        <div class="container-fluid">
+        <p>Monitor and manage live cotainer</p>
+            <div class="row">
+                <div class="col-12">
+                <div class="card-deck">
+    <div class="card">
+  <div class="card-body">
+    CPU CORES USAGES  <i style="font-size:18px" class="fa">&#xf05a;</i>
+  </div>
+  <div class="card-body">
+    <div class="progress-group">
+   
+    <div>
+      <span>Allocated: 2</span></div>
+     <div> <span class="float-right"><b style="color:green;font-size: 30px;">{{ total_cpu_usage }}%</b>/{{ cpu_count }}%</span><br>
+    
+      </div>
+       <br>
+      <div class="progress progress-sm">
+        <div class="progress-bar  bg-success" role="progressbar" style="width: {{cpu_usage}}%" aria-valuenow="{{ total_cpu_usage }}" aria-valuemin="0" aria-valuemax="{{ cpu_count }}"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-body">
+    MEMORY USAGE
+  </div>
+  <div class="card-body">
+    <div class="progress-group">
+    <div><br> <!-- Add line break here -->
+      <span class="float-right"><b style="color:green; font-size: 30px;">{{ ram_usage }}</b>/{{ ram_limit_str }}</span>
+   <br>
+   </div>
+    <br>
+      <div class="progress progress-sm">
+        <div class="progress-bar bg-success" role="progressbar" style="width: {{memory_usage}}%" aria-valuenow="{{memory_usage}}" aria-valuemin="0" aria-valuemax="{{ ram_total }}"></div>
+      </div>
+       </div>
+  </div>
+</div>
+
+
+<div class="card" >
+  <div class="card-body">
+    CONTAINERS
+  </div>
+  <div class="card-body">   
+     <div class="progress-group">
+      <div>
+     <span>Running containers: {{ containerRun}}</span><br>
+     <span>Stoped containers: {{ containerStop}} <i style="font-size:14px" class="fa">&#xf05a;</i></span>
+      <!-- Add line break here -->
+      <span class="float-right"><b style="color:green;font-size: 30px;">{{ containerRun}}</b>/{{ num_containers }} running</span>
+   <br>
+   </div>
+    <br>
+    
+      <div class="progress progress-sm">
+        <div class="progress-bar  bg-success" role="progressbar" style="width: {{ container_usage}}%" aria-valuenow="{{ containerRun}}" aria-valuemin="0" aria-valuemax="{{ num_containers }}"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<br><br>
+<div class="card-tools">
+   <ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link active" href="#revenue-chart" data-toggle="tab" >Table View</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#sales-chart" data-toggle="tab">Chart View</a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div id="revenue-chart" class="tab-pane fade show active">
+        <div id="table-container">
+            <table id="example2" class="table table-bordered table-hover dataTable dtr-inline" aria-describedby="example2_info">
+                <thead>
+                                    <tr>
+                                       
+                                        <th>NAMES</th>
+                                        <th>STATUS<i class="ion ion-android-arrow-down "></i></th>
+                                        <th>CPU %</th>
+                                        <th>MEMORY USAGE/LIMIT</th>
+                                        <th>MEM %</th>
+                                        <th>DISK READ/WRITE</th>
+                                        <th>NETWORK I/O</th>
+                                        <th>PIDS</th>
+                                        <th></th>
+                                       
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for container in performances %}
+                                    <tr>
+                                       
+                                        <td>{{ container.name }}</td>
+                                      
+                                         {% if 'Up' in container.status %}
+                                           <td style="color: green; background-color:#AFEEEE;">
+                                       
+					    running
+					 
+					    </td>
+					  {% else %}
+					  <td style="color: red; background-color:#FFB6C1;">
+					    stopped
+					  
+					    </td>
+					  {% endif %}
+                                        <td>{{ container.cpu_perc }}</td>
+                                        <td>{{ container.mem_usage }} / {{ container.mem_limit}}</td>
+                                        <td>{{ container.mem_perc }}</td>
+                                        <td>{{ container.block_io }}</td>
+                                        <td>{{ container.net_io }}</td>
+                                        <td>{{ container.pids }}</td>
+                                        <td>
+					   {% if 'Up' in container.status %} 
+						<a href="{% url 'stop_container' container.container_id %}" >
+						    <span style="color: dark;">◼</span>
+						</a>
+						{% else %} 
+						<a href="{% url 'start_container' container.container_id %}" style="color: dark;" >
+						    <span>▶</span>
+						</a>
+
+
+
+					   {% endif %} 
+					</td>
+
+
+                                     
+
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!-- /.card -->
+       
+          <div id="sales-chart" class="tab-pane fade" >
+          
+        <div id="chart-container" style="display: flex; width: 50%;" >
+             <div id="chart1" style="margin:25px;padding:15px;"> 
+                {% load static %}<img src="{% static 'dist/img/mem_chart.png' %}" alt="Memory Chart" style="width:450px;height:450px;">
+
+            </div>
+            <div id="chart2" style="margin:25px;padding:15px;">
+               <img src="{% static 'dist/img/cpu_chart.png' %}" alt="CPU Usage per Container" style="width:450px;height:450px;">
+            </div>
+      </div>
+    </div>
+            </div>
+        </div>
+    </section>
+   
+
+
+
+
+{% endblock main_content %}
+<script>
+
+    // Function to switch between chart view and table view
+    function switchView(view) {
+          function switchView(view) {
+        // Show/hide table and charts based on the selected view
+        if (view === 'revenue-chart') {
+            document.getElementById('table-container').style.display = 'block';
+            document.getElementById('chart-container').style.display = 'none';
+        } else {
+            document.getElementById('table-container').style.display = 'none';
+            document.getElementById('chart-container').style.display = 'block';
+        }
+    }
+    
+    // Event listener for tab clicks
+    var tabLinks = document.getElementsByClassName('nav-link');
+    for (var i = 0; i < tabLinks.length; i++) {
+        tabLinks[i].addEventListener('click', function(event) {
+            event.preventDefault();
+            var target = this.getAttribute('href').substring(1);
+            switchView(target);
+        });
+    }
+    
+
+</script>

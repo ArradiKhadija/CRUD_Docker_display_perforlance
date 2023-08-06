@@ -1,0 +1,25 @@
+{% extends 'Modele_admin/base_modele.html' %}
+
+{% block main_content %}
+
+    <h1>Résultats de la prédiction de performance CPU</h1>
+
+    <h2>Paramètres de régression :</h2>
+    <ul>
+        <li>Intercept : {{ intercept }}</li>
+        <li>Pente Total Usage : {{ slope_total_usage }}</li>
+        <li>Pente CPU System Total : {{ slope_cpu_system_total }}</li>
+    </ul>
+
+    <h2>Performance prédite :</h2>
+    <p>La performance prédite pour un exemple spécifique est : {{ predicted_performance }}</p>
+
+    <h2>Pie Chart :</h2>
+    <img src="/home/aouzal/DockerApplication/images/pie_chart.png" alt="Pie Chart">
+
+
+
+
+
+
+{% endblock main_content %}

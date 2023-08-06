@@ -1,0 +1,313 @@
+{% extends 'Modele_admin/base_modele.html' %}
+<!-- Inclure la bibliothèque Toastify -->
+
+{% block main_content %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light" style="top:-30px">
+  <a class="navbar-brand" id="hide" style="color:dark;display: block;font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;<">
+  <b>Listes des conteneurs</b></a>
+  
+<button id="delete-button" class="btn btn-outline-danger my-2 my-sm-0" style="position: fixed;right:45px;display: none;top=-30px"> 
+<a href="{% url 'delete_containers' %}" onclick="return confirm('Êtes-vous sûr de vouloir nettoyer tous les conteneurs ?')" ><span class="text-red">
+Remove All</span></a></button>
+
+<button id="cancel-button"  class="btn btn-outline-primary" style="position: fixed; right: 180px;display: none;">Cancel</button>
+
+
+<h4 id="show" style="color:dark;display: none;">CleanUp Containers</h4>
+
+ </nav>
+<div> 
+    <section class="content">
+        <div class="container-fluid">
+        <div>
+  
+  <p>
+    Les containers sont des éléments essentiels dans le développement d'applications logicielles et de sites web, largement utilisés dans des technologies de conteneurisation telles que Docker.<a href="https://www.docker.com/resources/what-container"><u>Learn more<i class="material-icons">&#xe895;</i></u></a>.
+  </p>
+
+                                         
+ 
+<nav class="navbar navbar-expand-lg navbar-light bg-light" >
+<a href="#" class="add-container-link" style="font-size:15px">
+ <button class="btn bg-info run-button"   style="position: fixed; right: 45px;"onclick="openPopup()">+ Add Container</button>
+</a>
+  
+
+
+</nav>                
+</div><br><br>
+<div>
+</div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        
+                        <!-- /.card-header -->
+                        <div class="card-body">
+                            <table id="example2" class="table table-bordered table-hover dataTable dtr-inline" aria-describedby="example2_info">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" id="select-all-checkbox" onclick="showDeleteButton()" /></th>
+                                        <th>CONTAINER ID</th>
+                                        <th>NAMES</th>
+                                        <th>IMAGE</th>
+                                        <th>STATUS</th>
+                                        <th style="text-align:center">Actions</th>
+                                       
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for container in containers %}
+                                    <tr>
+                                       <td>
+					    <input type="checkbox" id="checkbox{{ forloop.counter }}" onclick="showDeleteButton()" disabled>
+					</td>
+
+                                        <td>{{ container.id }}</td>
+                                        <td>{{ container.name }}</td>
+                                        <td><span  class="text-primary"><u>{{ container.image }}</u></span></td>
+                                        <td>{{ container.status }}</td>
+                                         <td>
+                                      
+						<div style="display: flex;justify-content: center;align-items: center;">
+						<a href="#" class=" edit-container-link"
+						   style="font-size:15px"
+						   data-container-id="{{ container.id }}"
+						   data-container-name="{{ container.name }}"
+						   data-container-image="{{ container.image }}">
+												
+						   <i class="fas edit-icon">&#xf303;</i>
+						</a>
+						<span>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;</span>
+						<a href="{% url 'delete_container' container.id %}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer le conteneur {{ container.name }} ?')">
+						    <i class="fas fa-trash delete-icon"></i>
+						</a>
+						</div>
+
+
+                                        </td>
+                                        
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        
+                                </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!-- /.card -->
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<!-- ... Autres éléments HTML ... -->
+
+
+<!-- ... Autres éléments HTML ... -->
+
+<div class="modal fade" id="edit-container-modal" tabindex="-1" role="dialog" aria-labelledby="edit-container-modal-label" aria-hidden="true" >
+  <div class="modal-dialog" role="document" style="top: 50%; transform: translateY(-50%);">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="edit-container-modal-label"> <i style='font-size:20px;color:dodgerblue' class='fas'>&#xf49e;</i>&nbsp;&nbsp;
+          Edit Container</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Formulaire de modification du conteneur -->
+        <form method="post" action="{% url 'edit_container' %}" >
+          {% csrf_token %}
+          <input type="hidden" name="container_id" value="" id="container-id-input">
+         <div class="form-group">
+                <label for="container-name">Container Name:</label>
+                <input type="text" name="container_name" class="form-control" id="container-name-input" value="{{conteneur.name}}" required>
+            </div>
+          <div class="form-group">
+            <label for="container-image">Container Image:</label>
+            <input type="text" name="container_image" class="form-control" id="container-image-input" value="{{ conteneur.image|default:'' }}" readonly>
+            <small id="input-notification" class="form-text text-muted" style="display: none;">This field is not editable.</small>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  <div class="popup modal" tabindex="-1" role="dialog"" id="popup">
+  
+                              <div class="popup-content modal-content">
+  
+                                <div class="modal-header">
+          <h5 class="modal-title" > <i style='font-size:20px;color:dodgerblue' class='fas'>&#xf49e;</i>&nbsp;&nbsp;
+            New Container</h5>
+        </div>
+                                 <div class="modal-body">
+                                <form method="post" action="{% url 'create_containers' %}" class="popup-form">
+                                  {% csrf_token %}
+                                  
+                                  <div class="form-group">
+                                    <label for="name">Container Name:</label>
+                                    <input type="text" name="name" class="form-control optional-field" id="container-name-input" placeholder="Saisir le nom du conteneur ">
+                                  </div>
+                                   <div class="form-group">
+                                    <label for="ports" >Ports:</label>
+                                    <input type="text" name="ports" class="form-control optional-field" id="container-name-input" placeholder="ce champs est optionnel">
+                                  </div>
+  
+                                  <div class="form-group">
+                                    <label for="image" >Container images:</label><br>
+                                    
+                                  <select id="image" name="image">
+                                  {% for container in image_details %}
+                                  <option><a name="image" class="form-control optional-field" id="container-image-input" >{{ container.name}}</a></option>
+                                      
+                                  {% endfor %}
+                                  </select>
+                                  </div>
+                                 
+                                  <div class="button-container">
+                                    <input id="close-button" style="margin-left: 10px;width: 100px;"  value="cancel" class="btn btn-success">
+                                    <input style="margin-left: 10px;width: 100px;" type="submit" value="Ajouter" class="btn btn-danger">
+                                  </div>
+                                  
+                                </form>
+                              </div>
+                            </div></div>
+<!-- JavaScript -->
+
+<style>
+    .delete-icon {
+        color: red;
+    }
+     .edit-icon {
+        color: green;
+    }
+</style>
+
+
+<!-- ... Autres éléments HTML ... -->
+
+<script>
+ function openPopup() {
+    var popup = document.getElementById("popup");
+    popup.style.display = "block";
+  }
+   var closeButton = document.getElementById("close-button");
+
+  // Récupération de l'élément conteneur du formulaire
+  var formContainer = document.getElementById("popup");
+
+  // Ajout d'un gestionnaire d'événement pour le clic sur le bouton de fermeture
+  closeButton.addEventListener("click", function () {
+    // Masquer le formulaire en définissant la propriété CSS "display" sur "none"
+    formContainer.style.display = "none";
+  });
+
+  var runButtons = document.querySelectorAll(".run-button");
+
+  runButtons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      var containerName = button.dataset.name;
+      var containerPorts = button.dataset.ports;
+      var containerImage =button.dataset.image;
+      
+
+      
+    });
+  });
+
+//-----------------------------
+document.addEventListener('DOMContentLoaded', function() {
+  var input = document.getElementById('container-image-input');
+  var notification = document.getElementById('input-notification');
+
+  input.addEventListener('click', function() {
+    notification.style.display = 'block';
+    setTimeout(function() {
+      notification.style.display = 'none';
+    }, 2000); // Temps d'affichage de la notification (2 secondes)
+  });
+});
+// Fonction pour mettre à jour les champs du formulaire de modification du conteneur
+function updateEditModal(containerId, containerName, containerImage) {
+  // Mettre à jour les valeurs des champs du formulaire avec les données du conteneur
+  document.getElementById('container-id-input').value = containerId;
+  document.getElementById('container-name-input').value = containerName;
+  document.getElementById('container-image-input').value = containerImage;
+  
+  // Afficher la fenêtre modale
+  $('#edit-container-modal').modal('show');
+
+  
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  var editLinks = document.getElementsByClassName('edit-container-link');
+  Array.prototype.forEach.call(editLinks, function(link) {
+    link.addEventListener('click', function(event) {
+      event.preventDefault();
+      var containerId = link.dataset.containerId;
+      var containerName = link.dataset.containerName;
+      var containerImage = link.dataset.containerImage;
+      updateEditModal(containerId, containerName, containerImage);
+    });
+  });
+});
+
+
+//--------------------------------
+function showDeleteButton() {
+    var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    var deleteButton = document.getElementById('delete-button');
+    var cancelButton = document.getElementById('cancel-button');
+    var show = document.getElementById('show');
+    var hide = document.getElementById('hide');
+    var hide_button = document.getElementById('hide_button');
+    var selectAllCheckbox = document.getElementById('select-all-checkbox');
+
+    for (var i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].checked = selectAllCheckbox.checked;
+    }
+
+    var checkedCount = 0;
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].checked) {
+            checkedCount++;
+        }
+    }
+
+    if (checkedCount > 0) {
+        deleteButton.style.display = 'block';
+        show.style.display = 'block';
+        cancelButton.style.display = 'block';
+        hide.style.display = 'none';
+        hide_button.style.display = 'none';
+    } else {
+        deleteButton.style.display = 'none';
+        cancelButton.style.display = 'none';
+        show.style.display = 'none';
+        hide.style.display = 'block';
+        hide_button.style.display = 'block';
+    }
+}
+</script>
+
+
+<!-- ... Autres éléments HTML ... -->
+
+
+
+<!-- ... Autres éléments HTML ... -->
+
+
+<!-- ... Other HTML code ... -->
+
+{% endblock main_content %}
+
+

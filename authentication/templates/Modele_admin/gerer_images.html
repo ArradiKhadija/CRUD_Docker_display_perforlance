@@ -1,0 +1,132 @@
+{% extends 'Modele_admin/base_modele.html' %}
+
+{% block main_content %}
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light" style="top:-30px">
+  <h3 class="navbar-brand" id="hide" style="color:dark;display: block;font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;"><b>Liste des images Docker</b></h3>
+  <a id="show" style="color:dark;display: none;" class="navbar-brand" >CleanUp Docker Images</a>
+  
+             <button id="delete-button" class="btn btn-outline-danger" style="position: fixed;right:45px;display: none;top=-30px"> 
+             <a href="{% url 'delete_all_ubuntu_images' %}"  onclick="return confirm('Êtes-vous sûr de vouloir nettoyer tous les images docker ?')"><span class="text-red"> Clean Up All</span></a>
+ </button>
+<button id="cancel-button"  class="btn btn-outline-primary" style="position: fixed; right: 180px;display: none;" onclick="cancel()">Cancel</button>
+
+</nav>
+
+
+
+<div>
+  <section class="content">
+    <div class="container-fluid">
+      <br>
+
+      <div class="row">
+        <div class="col-12">
+          <div class="card-tools">
+            <ul class="nav nav-tabs">
+              <li class="nav-item">
+                <a class="nav-link active" href="#revenue-chart" data-toggle="tab">LOCAL</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#sales-chart" data-toggle="tab">REMOTE REPOSITORIES</a>
+              </li>
+            </ul>
+
+            <div class="tab-content" style="padding:15px">
+              <div id="revenue-chart" class="tab-pane fade show active">
+                <div id="table-container">
+                  <table id="example2" class="table table-bordered table-hover dataTable dtr-inline" aria-describedby="example2_info">
+                    <thead>
+                      <tr>
+                         <th><input type="checkbox" id="select-all-checkbox" onclick="showDeleteButton()" /></th>
+                        <th></th>
+                        <th>TAGS</th>
+                        <th>IMAGE ID</th>
+                        <th>CREATED</th>
+                        <th>SIZE</th>
+                        <th style="text-align:center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for container in image_details %}
+                      <tr>
+                         <td><input type="checkbox" id="checkbox{{ forloop.counter }}" disabled></td>
+                        <td class="container-name"><u><b>{{ container.name}}</b></u></td>
+                        <td>{{ container.tag}}</td>
+                        <td>{{ container.image_id }}</td>
+                        <td>{{ container.created}}</td>
+                        <td>{{ container.size }}</td>
+                        <td>
+                          <div style="display: flex;justify-content: center;align-items: center;">
+                            <a href="#"  style="font-size:15px">
+                              <button class="btn btn-outline-success run-button" data-name="{{ container.name }}" onclick="openPopup()">Run ▶</button>
+                            </a>
+                            <span>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                            <a href="{% url 'delete_image' container.name %}">
+  <button class="btn btn-outline-danger my-2 my-sm-0" onclick="return confirm('Êtes-vous sûr de vouloir supprimer l\'image docker {{ container.name }} ?')">Clean Up</button>
+</a>
+</div>
+
+                      
+
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div id="sales-chart" class="tab-pane fade">
+                <br>
+                <form id="search-form" style="margin-left=159px">
+                  <input type="search" id="image-input" placeholder="Entrez le nom de l'image Docker">
+                  <button type="submit">Rechercher</button>
+                </form>
+                <br>
+                <div id="result-container"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+  <div class="popup modal" tabindex="-1" role="dialog"" id="popup">
+  
+                              <div class="popup-content modal-content">
+  <div class="modal-header">
+          <h5 class="modal-title" >  <i style="font-size:20px;color:dodgerblue" class="fa">&#xf0c2;</i>&nbsp;&nbsp;
+           Run Container</h5>
+        </div><br><br>
+                             
+                              <form method="post" action="{% url 'run_container' %}" class="popup-form">
+                                {% csrf_token %}
+                                
+
+                                <div class="optional-settings">
+                                  <span class="optional-toggle-settings fas fa-angle-up"></span> Paramètres optionnels
+                                </div>
+                                <div class="form-group">
+                                  <label for="name" class="optional-label">Container Name:</label>
+                                  <input type="text" name="name" class="form-control optional-field" id="container-name-input" placeholder="ce champs est optionnel">
+                                </div>
+
+                                <div class="form-group">
+                                  <label for="ports" class="optional-label">Ports:</label>
+                                  <input type="text" name="ports" class="form-control optional-field" id="container-name-input" placeholder="ce champs est optionnel">
+                                </div>
+                                <input type="hidden" name="image" class="form-control" id="container-image-input" value="{{ container.name }}">
+                                <div class="button-container">
+                                  <input id="close-button" style="margin-left: 10px;width: 100px;"  value="cancel" class="btn btn-success">
+                                  <input style="margin-left: 10px;width: 100px;" type="submit" value="Ajouter" class="btn btn-danger">
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+
+{% load static %}
+<script src="{%static 'dist/js/script_page.js' %}"></script>
+{% endblock main_content %}
+
